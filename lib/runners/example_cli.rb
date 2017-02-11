@@ -1,7 +1,8 @@
 require 'pry'
 class ExampleCLI
 
-attr_accessor :input, :search, :artist_name
+attr_accessor :input, :search, :artist_name, :artist_data
+@@pop_arr = []
 
   def call
     puts "Welcome, to the Spotify Popular Artist CLI interface app,"
@@ -28,6 +29,10 @@ attr_accessor :input, :search, :artist_name
       puts "Enter a genre:"
         @input = get_user_input
         search
+        puts "Enter a popularity number between 1-100"
+        @input = get_user_input
+        popularity_filter
+        return_names
     when "genre"
         genre
     else
@@ -44,12 +49,38 @@ attr_accessor :input, :search, :artist_name
   def search
     search_term = input.split(" ").join("%20").downcase
     puts "Your search term was #{input.capitalize}, I am searching..."
-    url = "http://api.spotify.com/v1/search?q=genre:#{search_term}&limit=50&type=artist"
+    artist_data = ""
+    counter = 0
+    5.times do
+    url = "http://api.spotify.com/v1/search?q=genre:#{search_term}&limit=50&offset=#{counter}&type=artist"
     artist_data = ExampleApi.new(url).list_artists
+    counter += 50
+    puts "This worked!"
+     end
     puts "Thank you for your patience. I found this on Spotify:"
-    artist_data.each_with_index do |artist, index |
-      puts "#{index + 1 }. #{artist}"
+    artist_data.each_with_index do |(artist, pop), index |
+      puts " #{index + 1}. #{artist}"
     end
+    @artist_data = artist_data
+  end
+
+  def popularity_filter
+    popularity_input = input.to_i
+    puts "Returning all artists with a popularity of more than #{popularity_input}"
+    artist_data.each do | artist, pop |
+      pop.each do |k,v|
+        if v < popularity_input
+          @@pop_arr << artist
+        end
+      end
+    end
+  end
+
+  def return_names
+    puts "Here are the artists that meet your parameters:"
+    @@pop_arr.each do | artist |
+    puts "#{artist}"
+  end
   end
 
   def help
