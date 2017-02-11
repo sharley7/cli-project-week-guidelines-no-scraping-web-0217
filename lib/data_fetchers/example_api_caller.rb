@@ -1,20 +1,23 @@
+require "pry"
 class ExampleApi
 
-  attr_reader :url, :music_data
+  attr_reader :url, :artist_data, :artist_name
+ @@artists = []
 
   def initialize(url)
     @url = url
-    @music_data = JSON.parse(RestClient.get(url))
+    @artist_data = JSON.parse(RestClient.get(url))
   end
 
-  def make_albums
-    albums = []
-    all_albums = music_data["tracks"]["items"]
-    all_albums.each do |album|
-      album_name = album["name"]
-      albums << ExampleModel.new(album_name)
+
+  def list_artists
+    artists = []
+    all_artists = artist_data["artists"]["items"]
+    all_artists.each do | artist |
+      artist_name = artist["name"]
+      artists << artist_name
     end
-    albums
+    artists
   end
 
 end

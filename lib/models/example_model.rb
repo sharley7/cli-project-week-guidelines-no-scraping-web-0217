@@ -1,9 +1,9 @@
 class ExampleModel
 
-  attr_reader :example
+  attr_reader :artist_name
 
-  def initialize(example)
-    @example = example
+  def initialize(artist_name)
+    @artist_name = artist_name
   end
 
 end
