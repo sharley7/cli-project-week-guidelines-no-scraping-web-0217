@@ -1,5 +1,6 @@
 class Genre
 
+#spaces and hyphens issue ... returning error page not sure if should email developer
 
 @@Genres = ["Aboriginal Folk",
 "Aboriginal Rock",
