@@ -1,6 +1,7 @@
 class Genre
 
 #spaces and hyphens issue ... returning error page not sure if should email developer
+# would still be cool to output genre list to user if they request
 
 @@Genres = ["Aboriginal Folk",
 "Aboriginal Rock",

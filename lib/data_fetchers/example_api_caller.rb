@@ -1,3 +1,9 @@
+# So I commented out everything since the pagination happens in the cli directory
+# I do want to get back to using this as a class so our code looks clean and awesome in the end
+
+
+
+
 # require "pry"
 # class ExampleApi
 #
