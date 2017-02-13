@@ -946,13 +946,12 @@ class Genre
 "Zydeco"]
 
   def initialize
+
   end
 
-  def self.list
-    @@genres.each_with_index do | genre, index |
-      puts "#{index + 1}. #{genre}"
-      end
-    end
+  def list_genres
+    pp @@Genres
+  end
 
 
 end
