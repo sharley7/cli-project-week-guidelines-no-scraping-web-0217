@@ -3,8 +3,9 @@ class ExampleCLI
 
 attr_accessor :input, :search, :artist_name, :artist_data
 
- @@pop_arr = []
+ @@popularity_array = []
  @@artist_hash = {}
+ @@simplified_genres = ['Blues', 'Classical','Country','Electronic','Hip Hop','Industrial','Jazz','Pop','R&B','Rock','World']
 
 # Started here - Decided to start my day easy and make the welcome screen look more welcoming, ascii logo added, star lines, exit message also added
   def call
@@ -44,7 +45,7 @@ attr_accessor :input, :search, :artist_name, :artist_data
     puts "                  Welcome to SPACIAL"
 # Figured out S.P.A.C.I.A.L. was a nice sounding anagram for what our app does - not commited to it, can definitely change
     puts "  The Spotify Popular Artist CLI Interface Application."
-    puts "Search for artists based on genre by popularity & followers!"
+    puts "    Search for artists based on genre by popularity!"
 # More stars and formatting in the above lines
     puts "*" * 60
     puts
@@ -62,13 +63,13 @@ attr_accessor :input, :search, :artist_name, :artist_data
    puts
    input = ""
 
-# So I had difficulty understanding case/when - for my benefit, I changed it to while and if... But totally open to using Case/When if you'd like too. Just not sure how to implement from here
-# added in more empty puts' for spacing - doesn't have to be there, can delete for whatever reason, (looks to oclunky on pack end, spacing doesnt look good... not married to it)
-   while input
+
      input = get_user_input
 
       if input == "help"
         help
+        puts
+        run
       elsif input == "exit"
         puts
         puts "Thank you for using SPACIAL. See you next time!"
@@ -80,29 +81,94 @@ attr_accessor :input, :search, :artist_name, :artist_data
         puts "Enter a genre:"
         puts
 
-        @input = get_user_input
-        search
-# here's where I want to create a new instance method, just so things look cleaner in the end.
-# I was thinking ideally it would puts out the help menu and add the new options available
-# i.e. (sort by popularity or followers/out put list with those stats? It's up to us to decide)
-        after_search_query
+        @input = get_user_input.downcase
+          if @@simplified_genres.include?(@input.capitalize)
 
-        @input = get_user_input
-# Did not get into popularity filter
-        popularity_filter
+            search
 
-        return_names
-      elsif input == "genre"
-        genre
-# Added in edge case output if user enters invalid command
-      else
-        puts
-        puts "Oops! It looks like '#{input}' is not a valid command."
-        puts
+            after_search_query
 
-        help
-      end
-    end
+            popularity_filter
+
+            puts
+            puts "Wow! Your list of #{@search_term} artists is now sorted!"
+            puts
+            puts
+            puts "If you would like to start again, enter 'restart'"
+            puts "If you would like to exit, enter 'exit'"
+            puts
+
+            @input = get_user_input
+
+            if @input == "restart"
+              run
+            elsif @input == "exit"
+              puts
+              puts "Thank you for using SPACIAL. See you next time!"
+              puts
+
+              exit
+            end
+
+          else
+            puts
+            puts "That doesn't seem to be a genre in our system"
+            puts "Check searchable genres by entering 'genre'"
+            puts
+          end
+
+          @input = get_user_input
+
+          if @input == 'genre'
+            list_genres_method
+
+            run
+          end
+
+          # if @input == 'popularity'
+          #   popularity_filter
+          #
+          #   puts "Wow! What a great sorted list of #{@search_term} artists!"
+          #   puts
+          #   puts "If you would like to start again, enter 'restart'"
+          #   puts "If you would like to exit, enter 'exit'"
+          #
+          #   @input = get_user_input
+          #
+          #   if @input == "restart"
+          #     run
+          #   elsif @input == "exit"
+          #     puts
+          #     puts "Thank you for using SPACIAL. See you next time!"
+          #     puts
+          #
+          #     exit
+          #   end
+          #
+          #
+          # end
+
+        elsif input == "genre"
+          list_genres_method
+
+          run
+        else
+          puts
+          puts "Oops! It looks like '#{input}' is not a valid command."
+          puts
+
+          help
+        end
+  end
+
+  def list_genres_method
+    puts
+    puts "Here is a list of searchable genres"
+    puts
+    puts "*" * 60
+    puts @@simplified_genres.join(", ")
+    puts "*" * 60
+    puts
   end
 
   def input
@@ -112,82 +178,37 @@ attr_accessor :input, :search, :artist_name, :artist_data
 # after search query - to be run after the search output
   def after_search_query
     puts
-    puts "Wow, what a great list of #{@search_term.capitalize} artists"
-    puts
-    puts "Now you have new search terms! Sory by 'popularity' and 'followers'."
-    puts
-    puts "Type 'popularity' to see popularity options"
-    puts "Type 'followers' to see followers options"
-    puts "Type 'help to see the help menu'"
-    puts
+    puts "Wow! What a great list of #{@search_term.capitalize} artists!"
 
-# Runs through the while/if conditional input menu - I think this could be refactored
-# Can only input help or exit at the moment, missing popularity and followers
-    input = ""
-    while input
-      input = get_user_input
-      if input == "help"
-        help
-      elsif input == "exit"
-        puts
-        puts "Thank you for using SPACIAL. See you next time!"
-        puts
-
-        exit
-      end
-    end
   end
 
-# This is the biggest change I followed the lecture steven made to a T
-# included the search loop entirely in the cli directory
-# now that this is working, it can be refactored to be included in another class
-# so that our code looks cleaner
   def search
     @search_term = input.split(" ").join("%20").downcase
-# Ran into some issues here with genres like hip-hop & hong kong pop or Honky Tonk
-# Not sure if we need to email a deveoper but if you try obscure genres
-# Using our app or messing around in a browser url, there's empty returns
-# My hunch was that some genres have spaces, and some use dashes to seperate words
-# But so far I can't figure out a solution - Might have to limit genre choice somehow
-# If it's out of our hands
+
     puts
     puts "Your search term was '#{input.capitalize}', I am searching the Spotify database. Please hold..."
     puts
 
-# Ideally still needs an if conditional statement to check input agains pre-existing genre array
-
-# ***
-# This chunk of code sets up the first url search instance
     first_url = "http://api.spotify.com/v1/search?q=genre:#{@search_term}&limit=50&offset=0&type=artist"
     first_url_artist_data_raw = RestClient.get(first_url)
     result = JSON.parse(first_url_artist_data_raw)
     artist_information_array = result["artists"]["items"]
-# ***
 
-# ***
-# This chunk of code uses pagination (until next == null) to run through all pages
-# Starts with original search URL from above, the loads next page and shovels results into an array
-# Will repeat loading next page until next == nul
     while result["artists"]["next"]
       artist_data_raw = RestClient.get(result["artists"]["next"])
       result = JSON.parse(artist_data_raw)
       artist_information_array += result["artists"]["items"]
     end
-# ***
 
-# Barely necessary load output string, our app is surprisingly fast... so far
     puts "Found artists...sorting..."
     puts
 
-# ***
-# This code block creates the full artist name hash with popularity and follower values
-# Feel free to try binding.pry here
+
     artist_information_array.each do | attribute_hash |
             each_artist_name = attribute_hash["name"]
             @@artist_hash[each_artist_name] ||= {}
             @@artist_hash[each_artist_name][:popularity] = attribute_hash["popularity"]
             @@artist_hash[each_artist_name][:followers] = attribute_hash["followers"]["total"]
-            # binding.pry
     end
 # ***
 
@@ -206,28 +227,60 @@ attr_accessor :input, :search, :artist_name, :artist_data
 # I did not touch the below popularity filter since _ spent most of my time re-formatting the above
 # I think variables will have to be changed here based on the above
 # I tried to make things more specific so variables are easy to understand at a glance
-  def popularity_filter
-    popularity_input = input.to_i
-    #Input is a string, so has to be change to an integer
-    puts "Returning all artists with a popularity of more than #{popularity_input}"
-    artist_data.each do | artist, pop |
-      pop.each do |k,v|
-        if v < popularity_input
-          @@pop_arr << artist
-          #pushing any artist with a popularity greater than input...can probably reconfinger this to accept a range
+def popularity_filter
+  puts
+  puts "Artist popularity is measured from 1-100. Please enter a popularity"
+  puts "     Please separate your numbers by a dash ('i.e. 40-80')"
+  puts "Output will demonstrate popularity metric and follower number"
+  puts
+    @input = get_user_input
+
+    input_array = input.strip.split("-")
+
+    if input_array.all? { |num_input| user_num = Integer(num_input) rescue false }
+      popularity_input_one = input_array[0].to_i
+      popularity_input_two = input_array[1].to_i
+      #Input is a string, so has to be change to an integer
+      most_popular = sort_hash_by_popularity.last[1][:popularity]
+      least_popular = sort_hash_by_popularity.first[1][:popularity]
+
+      if most_popular < popularity_input_one || least_popular > popularity_input_two
+        puts
+        puts "Sorry! that search is out of range. Please try again"
+        popularity_filter
+
+      else
+        puts
+        puts "Returning all artists with a popularity between #{popularity_input_one} and #{popularity_input_two}"
+        puts
+        puts
+
+        sort_hash_by_popularity.each do | artist, popularity_followers_hash |
+          popularity_followers_hash.each do |attribute, num|
+            if attribute == :popularity
+              if num >= popularity_input_one && num <= popularity_input_two
+                puts "#{artist}: #{popularity_followers_hash.to_s.delete("{}:=").gsub!(/[>]/, '= ')}"
+                puts
+              end
+            end
+          end
         end
       end
-    end
-  end
 
-# Just realized this was here. Looks like I can refactor the above
-# loop/output into this handy separate method
-  def return_names
-    puts "Here are the artists that meet your parameters:"
-    @@pop_arr.each do | artist |
-    puts "#{artist}"
-  end
-  end
+    else
+      puts
+      puts "Error: Please enter an number"
+
+      popularity_filter
+    end
+    # input.gsub!(/[\s, :><+=]/, '-')
+ end
+
+   def sort_hash_by_popularity
+     @@artist_hash.sort_by do | artist, popularity_followers_hash|
+       popularity_followers_hash[:popularity]
+     end
+   end
 
   def help
     puts "        ---Help Menu---       "
