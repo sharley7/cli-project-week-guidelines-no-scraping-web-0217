@@ -101,6 +101,7 @@ attr_accessor :input, :search, :artist_name, :artist_data
             @input = get_user_input
 
             if @input == "restart"
+              @@artist_hash.clear
               run
             elsif @input == "exit"
               puts
